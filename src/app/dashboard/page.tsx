@@ -115,6 +115,8 @@ export default function DashboardPage() {
                         </p>
                         <Link
                             href="https://discord.com/api/oauth2/authorize?client_id=1469757745816277022&permissions=8&scope=bot%20applications.commands"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="btn-ruby inline-block"
                         >
                             Add Rueby to a Server

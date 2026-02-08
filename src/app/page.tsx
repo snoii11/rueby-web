@@ -25,6 +25,8 @@ export default function Home() {
           </Link>
           <Link
             href="https://discord.com/api/oauth2/authorize?client_id=1469757745816277022&permissions=8&scope=bot%20applications.commands"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-ruby text-sm"
           >
             Add to Server
@@ -56,6 +58,8 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link
                 href="https://discord.com/api/oauth2/authorize?client_id=1469757745816277022&permissions=8&scope=bot%20applications.commands"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="btn-ruby text-center"
               >
                 ✨ Add to Server
@@ -162,6 +166,8 @@ export default function Home() {
           </p>
           <Link
             href="https://discord.com/api/oauth2/authorize?client_id=1469757745816277022&permissions=8&scope=bot%20applications.commands"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-ruby inline-block"
           >
             ✨ Add Rueby to Your Server
