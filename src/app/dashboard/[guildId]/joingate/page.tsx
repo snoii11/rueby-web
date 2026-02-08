@@ -92,148 +92,163 @@ export default async function JoinGatePage({
             <form action={updateJoinGate} className="space-y-8">
                 <input type="hidden" name="guildId" value={guildId} />
 
-                {/* Master Switch */}
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-center justify-between">
+                {/* Custom Toggle Switch */}
+                <div className="flex items-center justify-between p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl">
                     <div>
-                        <h3 className="text-xl font-semibold text-white">Enable Join Gate</h3>
-                        <p className="text-white/50 text-sm">Strictly filter all incoming members</p>
+                        <h3 className="font-semibold text-xl text-white">Enable Join Gate</h3>
+                        <p className="text-sm text-gray-400">Strictly filter all incoming members</p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            name="enabled"
-                            defaultChecked={config?.enabled ?? false}
-                            className="sr-only peer"
-                        />
-                        <div className="w-14 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600"></div>
+                    <label className="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" name="enabled" className="sr-only peer" defaultChecked={settings?.enabled ?? false} />
+                        <div className="w-14 h-8 bg-black/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-600 shadow-inner"></div>
+                        <div className="absolute inset-0 rounded-full ring-2 ring-white/5 group-hover:ring-white/20 transition-all"></div>
                     </label>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Account Age */}
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                        <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
-                            <span className="text-blue-400">👶</span> Account Age
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm text-white/70 mb-1">Min Age (Days)</label>
-                                <input
-                                    type="number"
-                                    name="accountAgeMinDays"
-                                    defaultValue={config?.accountAgeMinDays ?? 7}
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
-                                />
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">👶</span>
                             </div>
-                            <div>
-                                <label className="block text-sm text-white/70 mb-1">Action on Fail</label>
-                                <select
-                                    name="action_accountAge"
-                                    defaultValue={actions.accountAge}
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
-                                >
+                            <h3 className="font-semibold text-white">Account Age</h3>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Min Age (Days)</label>
+                            <input type="number" name="accountAgeMinDays" defaultValue={settings?.accountAgeMinDays ?? 7} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500/50 outline-none transition-all placeholder-white/20" />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
+                            <div className="relative">
+                                <select name="action_accountAge" defaultValue={activeActions.accountAge} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
                                     <option value="quarantine">Quarantine</option>
                                     <option value="kick">Kick</option>
                                     <option value="ban">Ban</option>
                                 </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Avatar Requirement */}
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                        <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
-                            <span className="text-purple-400">🖼️</span> Avatar Policy
-                        </h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between py-2">
-                                <label className="text-sm text-white/70">Require Avatar?</label>
-                                <input
-                                    type="checkbox"
-                                    name="avatarRequired"
-                                    defaultChecked={config?.avatarRequired ?? false}
-                                    className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                />
+                    {/* Avatar Policy */}
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">🖼️</span>
                             </div>
-                            <div>
-                                <label className="block text-sm text-white/70 mb-1">Action on Fail</label>
-                                <select
-                                    name="action_avatar"
-                                    defaultValue={actions.avatar}
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
-                                >
+                            <h3 className="font-semibold text-white">Avatar Policy</h3>
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
+                            <label className="text-sm font-medium text-gray-300">Require Avatar?</label>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="avatarRequired" className="sr-only peer" defaultChecked={settings?.avatarRequired ?? false} />
+                                <div className="w-5 h-5 border-2 border-gray-500 rounded bg-transparent peer-checked:bg-rose-500 peer-checked:border-rose-500 transition-all flex items-center justify-center">
+                                    <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
+                            <div className="relative">
+                                <select name="action_avatar" defaultValue={activeActions.avatar} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
                                     <option value="quarantine">Quarantine</option>
                                     <option value="kick">Kick</option>
                                     <option value="ban">Ban</option>
                                 </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Bot Policy */}
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                        <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
-                            <span className="text-gray-400">🤖</span> Bot Addition
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm text-white/70 mb-1">General Policy</label>
-                                <select
-                                    name="botAdditionPolicy"
-                                    defaultValue={config?.botAdditionPolicy ?? "allow"}
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
-                                >
+                    {/* Bot Addition */}
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">🤖</span>
+                            </div>
+                            <h3 className="font-semibold text-white">Bot Addition</h3>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Policy</label>
+                            <div className="relative">
+                                <select name="botAdditionPolicy" defaultValue={settings?.botAdditionPolicy ?? "allow"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
                                     <option value="allow">Allow All Bots</option>
                                     <option value="block">Block All Bots</option>
-                                    <option value="quarantine">Quarantine Bots</option>
+                                    <option value="verified_only">Verified Only</option>
                                 </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm text-white/70 mb-1">Unverified Bots</label>
-                                <select
-                                    name="unverifiedBotPolicy"
-                                    defaultValue={config?.unverifiedBotPolicy ?? "allow"}
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
-                                >
-                                    <option value="allow">Allow</option>
-                                    <option value="kick">Kick</option>
-                                    <option value="ban">Ban</option>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
+                            <div className="relative">
+                                <select name="action_bot" defaultValue={activeActions.bot} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
+                                    <option value="block">Kick Bot</option>
+                                    <option value="quarantine">Quarantine Inviter</option>
                                 </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Advertising */}
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                        <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
-                            <span className="text-yellow-400">📢</span> Profile Ads
-                        </h3>
-                        <div className="space-y-4">
-                            <p className="text-xs text-white/40">Detects discord.gg links in status/bio</p>
-                            <div>
-                                <label className="block text-sm text-white/70 mb-1">Action</label>
-                                <select
-                                    name="advertisingProfileRule"
-                                    defaultValue={config?.advertisingProfileRule ?? "ignore"}
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-indigo-500 focus:outline-none"
-                                >
+                    {/* Profile Ads */}
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">📢</span>
+                            </div>
+                            <h3 className="font-semibold text-white">Profile Ads</h3>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Detection Rule</label>
+                            <div className="relative">
+                                <select name="advertisingProfileRule" defaultValue={settings?.advertisingProfileRule ?? "ignore"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
                                     <option value="ignore">Ignore</option>
-                                    <option value="warn">Warn</option>
+                                    <option value="warn">Warn User</option>
+                                    <option value="strict">Strict (Discord Invites)</option>
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
+                            <div className="relative">
+                                <select name="action_advertising" defaultValue={activeActions.advertising} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
                                     <option value="quarantine">Quarantine</option>
                                     <option value="kick">Kick</option>
                                     <option value="ban">Ban</option>
                                 </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex justify-end pt-4">
-                    <button
-                        type="submit"
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-xl transition-all shadow-lg shadow-indigo-900/20"
-                    >
-                        Save Configuration
+                <div className="pt-6">
+                    <button type="submit" className="w-full bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-rose-500/20 flex items-center justify-center space-x-2">
+                        <span>Save Configuration</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     </button>
                 </div>
             </form>

@@ -90,100 +90,150 @@ export default async function VerificationPage({ params }: { params: { guildId: 
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
+            <h1 className="text-4xl font-black text-white bg-clip-text text-transparent bg-gradient-to-r from-rose-500 to-red-600">
                 Verification System
             </h1>
-            <p className="text-gray-400">Ensure every member is human before they join.</p>
+            <p className="text-gray-400 text-lg">Ensure every member is human before they join.</p>
 
-            <form action={updateVerification} className="space-y-8 bg-black/20 p-6 rounded-xl border border-white/10 backdrop-blur-md">
+            <form action={updateVerification} className="space-y-8">
                 <input type="hidden" name="guildId" value={guildId} />
 
                 {/* Main Toggle */}
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex items-center justify-between p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl">
                     <div>
-                        <h3 className="font-semibold text-white">Enable Verification</h3>
+                        <h3 className="font-semibold text-xl text-white">Enable Verification</h3>
                         <p className="text-sm text-gray-400">Turn the entire verification system on or off.</p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="relative inline-flex items-center cursor-pointer group">
                         <input type="checkbox" name="enabled" className="sr-only peer" defaultChecked={settings?.enabled ?? false} />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                        <div className="w-14 h-8 bg-black/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-600 shadow-inner"></div>
+                        <div className="absolute inset-0 rounded-full ring-2 ring-white/5 group-hover:ring-white/20 transition-all"></div>
                     </label>
                 </div>
 
                 {/* Mode & Target */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Verification Mode</label>
-                        <select name="mode" defaultValue={settings?.mode ?? "BUTTON"} className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-green-500">
-                            <option value="BUTTON">Button Interaction</option>
-                            <option value="CAPTCHA">Captcha Image</option>
-                            <option value="WEB">Web Portal (Coming Soon)</option>
-                            <option value="NONE">None</option>
-                        </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">🛡️</span>
+                            </div>
+                            <h3 className="font-semibold text-white">Verification Mode</h3>
+                        </div>
+                        <div className="relative">
+                            <select name="mode" defaultValue={settings?.mode ?? "BUTTON"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
+                                <option value="BUTTON">Button Interaction</option>
+                                <option value="CAPTCHA">Captcha Image</option>
+                                <option value="WEB">Web Portal (Coming Soon)</option>
+                                <option value="NONE">None</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                            </div>
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Target Range</label>
-                        <select name="target" defaultValue={settings?.target ?? "ALL"} className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-green-500">
-                            <option value="ALL">All Users</option>
-                            <option value="SUSPICIOUS">Suspicious Only (New Accounts)</option>
-                        </select>
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">🎯</span>
+                            </div>
+                            <h3 className="font-semibold text-white">Target Range</h3>
+                        </div>
+                        <div className="relative">
+                            <select name="target" defaultValue={settings?.target ?? "ALL"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
+                                <option value="ALL">All Users</option>
+                                <option value="SUSPICIOUS">Suspicious Only (New Accounts)</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Channel & Role */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Verification Channel</label>
-                        <select name="verificationChannelId" defaultValue={settings?.verificationChannelId ?? ""} className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-green-500">
-                            <option value="">Select a Channel...</option>
-                            {textChannels.map(c => (
-                                <option key={c.id} value={c.id}>#{c.name}</option>
-                            ))}
-                        </select>
-                        <p className="text-xs text-gray-500">Where the verification prompt will be sent.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">📢</span>
+                            </div>
+                            <h3 className="font-semibold text-white">Verification Channel</h3>
+                        </div>
+                        <div className="relative">
+                            <select name="verificationChannelId" defaultValue={settings?.verificationChannelId ?? ""} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
+                                <option value="">Select a Channel...</option>
+                                {textChannels.map(c => (
+                                    <option key={c.id} value={c.id}>#{c.name}</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 font-medium">Where the verification prompt will be sent.</p>
                     </div>
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Verified Role</label>
-                        <select name="verifiedRoleId" defaultValue={settings?.verifiedRoleId ?? ""} className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-green-500">
-                            <option value="">Select a Role...</option>
-                            {roles.map(r => (
-                                <option key={r.id} value={r.id} style={{ color: r.color ? `#${r.color.toString(16).padStart(6, '0')}` : 'inherit' }}>
-                                    @{r.name}
-                                </option>
-                            ))}
-                        </select>
-                        <p className="text-xs text-gray-500">Role given after successful verification.</p>
+
+                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                                <span className="text-xl">🏅</span>
+                            </div>
+                            <h3 className="font-semibold text-white">Verified Role</h3>
+                        </div>
+                        <div className="relative">
+                            <select name="verifiedRoleId" defaultValue={settings?.verifiedRoleId ?? ""} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
+                                <option value="">Select a Role...</option>
+                                {roles.map(r => (
+                                    <option key={r.id} value={r.id} style={{ color: r.color ? `#${r.color.toString(16).padStart(6, '0')}` : 'inherit' }}>
+                                        @{r.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 font-medium">Role given after successful verification.</p>
                     </div>
                 </div>
 
                 {/* Failure Action */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Action on Fail / Timeout</label>
-                    <div className="flex space-x-4">
+                <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
+                    <div className="flex items-center space-x-3 mb-2">
+                        <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                            <span className="text-xl">⚠️</span>
+                        </div>
+                        <h3 className="block text-sm font-medium text-gray-300">Action on Fail / Timeout</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-4">
                         {['NONE', 'QUARANTINE', 'KICK', 'BAN'].map((action) => (
-                            <label key={action} className="flex items-center space-x-2 cursor-pointer">
-                                <input type="radio" name="actionOnFail" value={action} defaultChecked={(settings?.actionOnFail ?? "QUARANTINE") === action} className="form-radio text-green-500 bg-black/50 border-white/10" />
-                                <span className="text-white capitalize">{action.toLowerCase()}</span>
+                            <label key={action} className="relative cursor-pointer group">
+                                <input type="radio" name="actionOnFail" value={action} defaultChecked={(settings?.actionOnFail ?? "QUARANTINE") === action} className="sr-only peer" />
+                                <div className="px-6 py-3 rounded-xl border border-white/10 bg-black/20 text-gray-400 peer-checked:bg-rose-500/20 peer-checked:border-rose-500 peer-checked:text-rose-400 transition-all group-hover:bg-white/5">
+                                    <span className="font-bold tracking-wider">{action}</span>
+                                </div>
                             </label>
                         ))}
                     </div>
                 </div>
 
                 {/* Settings */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/5">
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Timeout (Seconds)</label>
-                        <input type="number" name="captchaTimeout" defaultValue={settings?.captchaTimeout ?? 300} className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-green-500" />
+                        <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Timeout (Seconds)</label>
+                        <input type="number" name="captchaTimeout" defaultValue={settings?.captchaTimeout ?? 300} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all placeholder-white/20" />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Max Attempts</label>
-                        <input type="number" name="captchaMaxAttempts" defaultValue={settings?.captchaMaxAttempts ?? 3} className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-green-500" />
+                        <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Max Attempts</label>
+                        <input type="number" name="captchaMaxAttempts" defaultValue={settings?.captchaMaxAttempts ?? 3} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all placeholder-white/20" />
                     </div>
                 </div>
 
                 <div className="pt-6">
-                    <button type="submit" className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-green-500/20">
-                        Save Changes
+                    <button type="submit" className="w-full bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-rose-500/20 flex items-center justify-center space-x-2">
+                        <span>Save Configuration</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     </button>
                 </div>
             </form>
