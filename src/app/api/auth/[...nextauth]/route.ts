@@ -21,7 +21,6 @@ const handler = NextAuth({
             return token;
         },
         async session({ session, token }) {
-            // @ts-expect-error - Adding custom properties
             session.accessToken = token.accessToken;
             return session;
         },
