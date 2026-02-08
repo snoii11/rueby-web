@@ -1,23 +1,63 @@
-"use client";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
-import { useParams } from "next/navigation";
+export default async function GuildOverviewPage({
+    params,
+}: {
+    params: Promise<{ guildId: string }>;
+}) {
+    const { guildId } = await params;
 
-export default function GuildOverviewPage() {
-    const params = useParams();
-    const guildId = params.guildId as string;
+    // Fetch Guild Data in parallel
+    const [
+        caseCount,
+        banCount,
+        warnCount,
+        heatConfig,
+        antiNuke,
+        joinGate,
+        verification,
+        panicState,
+        recentCases
+    ] = await Promise.all([
+        prisma.case.count({ where: { guildId } }),
+        prisma.case.count({ where: { guildId, type: "BAN" } }),
+        prisma.case.count({ where: { guildId, type: "WARN" } }),
+        prisma.heatConfig.findUnique({ where: { guildId } }),
+        prisma.antiNukeLimits.findUnique({ where: { guildId } }),
+        prisma.joinGate.findUnique({ where: { guildId } }),
+        prisma.verificationSettings.findUnique({ where: { guildId } }),
+        prisma.panicState.findUnique({ where: { guildId } }),
+        prisma.case.findMany({
+            where: { guildId },
+            orderBy: { createdAt: "desc" },
+            take: 5,
+        })
+    ]);
 
-    // Mock stats - in production, fetch from API
+    // Format stats
     const stats = [
-        { label: "Cases", value: "247", icon: "📋" },
-        { label: "Bans", value: "42", icon: "🔨" },
-        { label: "Warnings", value: "156", icon: "⚠️" },
-        { label: "Heat Score", value: "Low", icon: "🔥" },
+        { label: "Cases", value: caseCount.toString(), icon: "📋" },
+        { label: "Bans", value: banCount.toString(), icon: "🔨" },
+        { label: "Warnings", value: warnCount.toString(), icon: "⚠️" },
+        { label: "Heat Score", value: "Low", icon: "🔥" }, // Placeholder for calculated score
     ];
 
-    const recentActions = [
-        { type: "ban", user: "Spammer#1234", mod: "Admin#0001", time: "2 min ago" },
-        { type: "warn", user: "User#5678", mod: "Mod#0002", time: "15 min ago" },
-        { type: "mute", user: "Troll#9999", mod: "Admin#0001", time: "1 hour ago" },
+    // Format recent actions
+    const formattedActions = recentCases.map(c => ({
+        type: c.type.toLowerCase(),
+        user: c.targetId || "Unknown",
+        mod: c.actorId || "System",
+        time: new Date(c.createdAt).toLocaleDateString(),
+        original: c
+    }));
+
+    // Config toggles state
+    const toggles = [
+        { label: "Anti-Nuke Protection", enabled: antiNuke?.enabled ?? false, link: "/antinuke" },
+        { label: "Join Gate", enabled: joinGate?.enabled ?? false, link: "/joingate" },
+        { label: "Verification Required", enabled: verification?.enabled ?? false, link: "/verification" },
+        { label: "Panic Mode", enabled: panicState?.active ?? false, link: "/panic" },
     ];
 
     return (
@@ -41,26 +81,27 @@ export default function GuildOverviewPage() {
                 ))}
             </div>
 
-            {/* Quick Toggles */}
+            {/* Config & Actions Grid */}
             <div className="grid lg:grid-cols-2 gap-6 mb-8">
+                {/* Quick Toggles / Status */}
                 <div className="glass-card p-6">
-                    <h2 className="text-xl font-semibold text-white mb-4">Quick Toggles</h2>
+                    <h2 className="text-xl font-semibold text-white mb-4">System Status</h2>
                     <div className="space-y-4">
-                        {[
-                            { label: "Anti-Nuke Protection", enabled: true },
-                            { label: "Join Gate", enabled: true },
-                            { label: "Verification Required", enabled: false },
-                            { label: "Panic Mode", enabled: false },
-                        ].map((toggle, i) => (
+                        {toggles.map((toggle, i) => (
                             <div
                                 key={i}
                                 className="flex items-center justify-between p-3 rounded-lg bg-white/5"
                             >
                                 <span className="text-white">{toggle.label}</span>
-                                <button
-                                    className={`toggle ${toggle.enabled ? "active" : ""}`}
-                                    aria-label={`Toggle ${toggle.label}`}
-                                />
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-3 h-3 rounded-full ${toggle.enabled ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-white/10"}`} />
+                                    <Link
+                                        href={`/dashboard/${guildId}${toggle.link}`}
+                                        className="text-xs text-white/40 hover:text-white transition-colors"
+                                    >
+                                        Configure →
+                                    </Link>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -70,27 +111,33 @@ export default function GuildOverviewPage() {
                 <div className="glass-card p-6">
                     <h2 className="text-xl font-semibold text-white mb-4">Recent Actions</h2>
                     <div className="space-y-3">
-                        {recentActions.map((action, i) => (
-                            <div
-                                key={i}
-                                className="flex items-center justify-between p-3 rounded-lg bg-white/5"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="text-lg">
-                                        {action.type === "ban"
-                                            ? "🔨"
-                                            : action.type === "warn"
-                                                ? "⚠️"
-                                                : "🔇"}
-                                    </span>
-                                    <div>
-                                        <p className="text-white text-sm">{action.user}</p>
-                                        <p className="text-white/40 text-xs">by {action.mod}</p>
+                        {formattedActions.length > 0 ? (
+                            formattedActions.map((action, i) => (
+                                <div
+                                    key={i}
+                                    className="flex items-center justify-between p-3 rounded-lg bg-white/5"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-lg" title={action.type}>
+                                            {action.type.includes("ban") ? "🔨" :
+                                                action.type.includes("warn") ? "⚠️" :
+                                                    action.type.includes("mute") ? "🔇" : "📝"}
+                                        </span>
+                                        <div>
+                                            <p className="text-white text-sm truncate max-w-[120px]">
+                                                {action.user}
+                                            </p>
+                                            <p className="text-white/40 text-xs">by {action.mod}</p>
+                                        </div>
                                     </div>
+                                    <span className="text-white/40 text-xs">{action.time}</span>
                                 </div>
-                                <span className="text-white/40 text-xs">{action.time}</span>
+                            ))
+                        ) : (
+                            <div className="text-center py-6 text-white/40 text-sm">
+                                No recent actions found
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             </div>

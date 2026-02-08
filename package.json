@@ -3,16 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "NODE_OPTIONS='--dns-result-order=ipv4first' next dev",
+    "build": "NODE_OPTIONS='--dns-result-order=ipv4first' next build",
+    "start": "NODE_OPTIONS='--dns-result-order=ipv4first' next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "5.22.0",
+    "dotenv": "^17.2.4",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
-    "prisma": "^7.3.0",
+    "pg": "8.18.0",
+    "prisma": "5.22.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

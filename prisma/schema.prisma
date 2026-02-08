@@ -1,0 +1,464 @@
+// Prisma Schema for Rueby Bot - Wick-inspired Discord Security Bot
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Guild Configuration
+// ============================================
+
+model Guild {
+  id           String   @id // Discord Guild ID
+  ownerId      String   // Discord Owner ID
+  featureFlags Json     @default("{}")
+  prefix       String   @default("!")
+  timezone     String   @default("UTC")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  permits              Permit[]
+  whitelists           Whitelist[]
+  heatState            HeatState[]
+  heatConfig           HeatConfig?
+  antiNukeLimits       AntiNukeLimits?
+  backups              Backup[]
+  verificationSettings VerificationSettings?
+  joinGate             JoinGate?
+  cases                Case[]
+  logsRouting          LogsRouting?
+  panicState           PanicState?
+  lockdownState        LockdownState?
+  quarantineRole       String? // Role ID for quarantine
+  muteRole             String? // Role ID for mute (fallback)
+
+  @@map("guilds")
+}
+
+// ============================================
+// Permit System (L1-L5 Levels)
+// ============================================
+
+enum PermitLevel {
+  L1 // Helper - Basic moderation view
+  L2 // Moderator - Timeout, warn, mute
+  L3 // Senior Mod - Kick, ban, purge
+  L4 // Trusted Admin - Antinuke config, lockdown
+  L5 // Owner/Extra Owner - Full access, panic mode
+}
+
+model Permit {
+  id        String      @id @default(cuid())
+  guildId   String
+  guild     Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  roleId    String // Discord Role ID
+  level     PermitLevel
+  overrides Json        @default("{}") // Per-command overrides
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([guildId, roleId])
+  @@index([guildId])
+  @@map("permits")
+}
+
+// ============================================
+// Whitelist System
+// ============================================
+
+enum WhitelistRefType {
+  MEMBER
+  ROLE
+  CHANNEL
+  CATEGORY
+  WEBHOOK
+}
+
+model Whitelist {
+  id        String           @id @default(cuid())
+  guildId   String
+  guild     Guild            @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  refType   WhitelistRefType
+  refId     String // Discord ID of the whitelisted entity
+  scopes    String[] // spam, mentions, invites, publicRoleMentions, quarantineTouch, antinuke
+  notes     String?
+  createdBy String // Discord User ID who added this
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([guildId, refType, refId])
+  @@index([guildId])
+  @@index([guildId, refType])
+  @@map("whitelists")
+}
+
+// ============================================
+// Heat System (AutoMod)
+// ============================================
+
+model HeatState {
+  id          String   @id @default(cuid())
+  guildId     String
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  subjectId   String // User ID or Webhook ID
+  subjectType String   @default("user") // user | webhook
+  score       Float    @default(0)
+  strikes     Int      @default(0)
+  lastEventAt DateTime @default(now())
+  decayCursor DateTime @default(now())
+
+  @@unique([guildId, subjectId])
+  @@index([guildId])
+  @@index([guildId, subjectId])
+  @@map("heat_states")
+}
+
+model HeatConfig {
+  id        String   @id @default(cuid())
+  guildId   String   @unique
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  enabled   Boolean  @default(true)
+
+  // Signal weights (JSON: { signalName: weight })
+  weights Json @default("{\"messageRate\": 1.0, \"duplicates\": 2.0, \"massMentions\": 3.0, \"links\": 1.5, \"attachments\": 0.5, \"emojiSpam\": 1.0, \"suspiciousUnicode\": 2.0, \"webhookMessages\": 2.5}")
+
+  // Thresholds (JSON: { T1: score, T2: score, ... })
+  thresholds Json @default("{\"T1\": 10, \"T2\": 25, \"T3\": 50, \"T4\": 100}")
+
+  // Actions per threshold (JSON: { T1: action, T2: action, ... })
+  actions Json @default("{\"T1\": \"warn\", \"T2\": \"timeout\", \"T3\": \"kick\", \"T4\": \"ban\"}")
+
+  // Decay rate (lambda for exponential decay, per minute)
+  decayRate Float @default(0.1)
+
+  // Strike caps before escalation
+  strikeCaps Json @default("{\"T1\": 3, \"T2\": 2, \"T3\": 1}")
+
+  // Webhook policy: stricter multiplier for webhook messages
+  webhookMultiplier Float @default(2.0)
+
+  // Auto-timeout duration in seconds for T1/T2
+  autoTimeoutSeconds Int @default(300)
+
+  // Reset heat on timeout
+  resetOnTimeout Boolean @default(true)
+
+  // DM user on action
+  dmOnAction Boolean @default(true)
+
+  // Panic mode settings
+  panicThreshold      Int @default(5) // N distinct users crossing raider threshold
+  panicWindowSeconds  Int @default(60) // Within W seconds
+  panicDurationMinutes Int @default(10) // Enable raid mode for D minutes
+
+  // Auto-lockdown on mention storms
+  mentionLockdownThreshold Int @default(20) // M mentions
+  mentionLockdownWindow    Int @default(10) // In S seconds
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("heat_configs")
+}
+
+// ============================================
+// Anti-Nuke System
+// ============================================
+
+model AntiNukeLimits {
+  id      String  @id @default(cuid())
+  guildId String  @unique
+  guild   Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  enabled Boolean @default(true)
+
+  // Per-minute limits (JSON: { action: limit })
+  minuteLimits Json @default("{\"channelDelete\": 3, \"channelCreate\": 5, \"roleDelete\": 3, \"roleCreate\": 5, \"ban\": 5, \"kick\": 10, \"webhookCreate\": 3, \"webhookDelete\": 3}")
+
+  // Per-hour limits (JSON: { action: limit })
+  hourLimits Json @default("{\"channelDelete\": 10, \"channelCreate\": 20, \"roleDelete\": 10, \"roleCreate\": 20, \"ban\": 20, \"kick\": 50, \"webhookCreate\": 10, \"webhookDelete\": 10}")
+
+  // Actions on limit exceed (JSON: { action: response })
+  // Responses: quarantine, roles_lockdown, lock_all, ban
+  responses Json @default("{\"channelDelete\": \"quarantine\", \"roleDelete\": \"quarantine\", \"ban\": \"quarantine\", \"kick\": \"quarantine\"}")
+
+  // Exemptions (role IDs that bypass limits)
+  exemptRoles String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("antinuke_limits")
+}
+
+// ============================================
+// Backup System
+// ============================================
+
+model Backup {
+  id        String   @id @default(cuid())
+  guildId   String
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  type      String   @default("auto") // auto | manual | incident
+  snapshot  Json // Full snapshot of roles, channels, overwrites, webhooks
+  diff      Json? // Diff from previous backup
+  signature String? // Hash for integrity
+  createdBy String? // User ID if manual
+  createdAt DateTime @default(now())
+
+  @@index([guildId])
+  @@index([guildId, createdAt])
+  @@map("backups")
+}
+
+// ============================================
+// Verification System
+// ============================================
+
+enum VerificationMode {
+  NONE
+  BUTTON
+  CAPTCHA
+  WEB
+}
+
+enum VerificationFailAction {
+  NONE
+  QUARANTINE
+  KICK
+  BAN
+}
+
+enum VerificationTarget {
+  ALL
+  SUSPICIOUS
+}
+
+model VerificationSettings {
+  id           String                 @id @default(cuid())
+  guildId      String                 @unique
+  guild        Guild                  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  enabled      Boolean                @default(false)
+  mode         VerificationMode       @default(BUTTON)
+  actionOnFail VerificationFailAction @default(QUARANTINE)
+  target       VerificationTarget     @default(ALL)
+
+  // Channel for verification
+  verificationChannelId String?
+
+  // Role to give on verification
+  verifiedRoleId String?
+
+  // Captcha settings
+  captchaLength   Int    @default(6)
+  captchaStyle    String @default("alphanumeric") // alphanumeric, numeric, alpha
+  captchaNoise    Int    @default(3) // 1-5 noise level
+  captchaTimeout  Int    @default(300) // Seconds to solve
+  captchaMaxAttempts Int @default(3)
+
+  // Regen interval (0 = no regen)
+  regenSeconds Int @default(0)
+
+  // Custom messages
+  welcomeMessage     String?
+  verificationPrompt String?
+  successMessage     String?
+  failMessage        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("verification_settings")
+}
+
+// ============================================
+// Join Gate
+// ============================================
+
+model JoinGate {
+  id      String  @id @default(cuid())
+  guildId String  @unique
+  guild   Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  enabled Boolean @default(false)
+
+  // Account age minimum (in days)
+  accountAgeMinDays Int @default(7)
+
+  // Avatar required
+  avatarRequired Boolean @default(false)
+
+  // Bot addition policy: allow, block, quarantine
+  botAdditionPolicy String @default("allow")
+
+  // Unverified bot policy: allow, kick, ban
+  unverifiedBotPolicy String @default("allow")
+
+  // Advertising profile rule: ignore, warn, quarantine, kick, ban
+  advertisingProfileRule String @default("ignore")
+
+  // Username rules (JSON array of { pattern, action, reason })
+  usernameRules Json @default("[]")
+
+  // Actions for each check failure (JSON: { check: action })
+  actions Json @default("{\"accountAge\": \"quarantine\", \"avatar\": \"quarantine\", \"bot\": \"block\", \"advertising\": \"quarantine\", \"username\": \"quarantine\"}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("join_gates")
+}
+
+// ============================================
+// Moderation Cases
+// ============================================
+
+enum CaseType {
+  WARN
+  TIMEOUT
+  MUTE
+  UNMUTE
+  KICK
+  BAN
+  UNBAN
+  SOFTBAN
+  QUARANTINE
+  UNQUARANTINE
+  PURGE
+  LOCKDOWN
+  UNLOCK
+  PANIC
+  VERIFICATION_FAIL
+  JOINGATE_FAIL
+  HEAT_ACTION
+  ANTINUKE_ACTION
+}
+
+model Case {
+  id        String   @id @default(cuid())
+  guildId   String
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  caseId    Int // Guild-specific case number
+  type      CaseType
+  actorId   String // Moderator or "SYSTEM"
+  targetId  String // Target user/channel/role
+  reason    String?
+  evidence  Json? // Screenshots, message logs, etc.
+  duration  Int? // Duration in seconds (for timeout/mute)
+  active    Boolean  @default(true)
+  resolvedBy String? // Who resolved/pardoned
+  resolvedAt DateTime?
+  expiresAt DateTime? // For timed actions
+  messageId String? // Log message ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([guildId, caseId])
+  @@index([guildId])
+  @@index([guildId, targetId])
+  @@index([guildId, actorId])
+  @@index([guildId, type])
+  @@map("cases")
+}
+
+// ============================================
+// Logs Routing
+// ============================================
+
+model LogsRouting {
+  id        String  @id @default(cuid())
+  guildId   String  @unique
+  guild     Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  // Channel IDs for each log type
+  automodChannel      String?
+  antinukeChannel     String?
+  verificationChannel String?
+  joingateChannel     String?
+  joinraidChannel     String?
+  panicChannel        String?
+  reportsChannel      String?
+  moderationChannel   String?
+
+  // Fallback channel if specific route is missing
+  fallbackChannelId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("logs_routing")
+}
+
+// ============================================
+// Panic State
+// ============================================
+
+enum PanicType {
+  HEAT
+  ANTINUKE
+  MANUAL
+  MANUAL_LOCKDOWN // Added to support manual lockdown
+}
+
+model PanicState {
+  id        String    @id @default(cuid())
+  guildId   String    @unique
+  guild     Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  active    Boolean   @default(false)
+  type      PanicType @default(MANUAL)
+  reason    String?
+  startedAt DateTime?
+  startedBy String? // User ID or "SYSTEM"
+
+  // Auto-unlock policy: none, timer, manual
+  autoUnlockPolicy String @default("manual")
+  autoUnlockMinutes Int   @default(30)
+
+  // Stored role permissions before lockdown
+  storedPermissions Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("panic_states")
+}
+
+// ============================================
+// Lockdown State
+// ============================================
+
+model LockdownState {
+  id      String  @id @default(cuid())
+  guildId String  @unique
+  guild   Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  // Active lockdown modes
+  channelLockdown Boolean @default(false)
+  rolesLockdown   Boolean @default(false)
+  joinsLockdown   Boolean @default(false)
+
+  // Locked channels (JSON array of channel IDs and their original perms)
+  lockedChannels Json @default("[]")
+
+  // Stripped role permissions (JSON: { roleId: originalPerms })
+  strippedRoles Json @default("{}")
+
+  // Join action during lockdown: kick, ban
+  joinAction String @default("kick")
+
+  // Auto-unlock settings
+  autoUnlock        Boolean  @default(false)
+  autoUnlockMinutes Int      @default(30)
+  startedAt         DateTime?
+  startedBy         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("lockdown_states")
+}
