@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { REST } from "@discordjs/rest";
 import { Routes, APIChannel, APIRole, ChannelType } from "discord-api-types/v10";
 import { revalidatePath } from "next/cache";
+import CustomSelect from "@/components/ui/CustomSelect";
+import CustomCheckbox from "@/components/ui/CustomCheckbox";
 
 async function updateVerification(formData: FormData) {
     "use server";
@@ -120,17 +122,16 @@ export default async function VerificationPage({ params }: { params: { guildId: 
                             </div>
                             <h3 className="font-semibold text-white">Verification Mode</h3>
                         </div>
-                        <div className="relative">
-                            <select name="mode" defaultValue={settings?.mode ?? "BUTTON"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                <option value="BUTTON">Button Interaction</option>
-                                <option value="CAPTCHA">Captcha Image</option>
-                                <option value="WEB">Web Portal (Coming Soon)</option>
-                                <option value="NONE">None</option>
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                            </div>
-                        </div>
+                        <CustomSelect
+                            name="mode"
+                            defaultValue={settings?.mode ?? "BUTTON"}
+                            options={[
+                                { label: 'Button Interaction', value: 'BUTTON' },
+                                { label: 'Captcha Image', value: 'CAPTCHA' },
+                                { label: 'Web Portal (Coming Soon)', value: 'WEB' },
+                                { label: 'None', value: 'NONE' }
+                            ]}
+                        />
                     </div>
                     <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
                         <div className="flex items-center space-x-3 mb-2">
@@ -139,15 +140,14 @@ export default async function VerificationPage({ params }: { params: { guildId: 
                             </div>
                             <h3 className="font-semibold text-white">Target Range</h3>
                         </div>
-                        <div className="relative">
-                            <select name="target" defaultValue={settings?.target ?? "ALL"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                <option value="ALL">All Users</option>
-                                <option value="SUSPICIOUS">Suspicious Only (New Accounts)</option>
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                            </div>
-                        </div>
+                        <CustomSelect
+                            name="target"
+                            defaultValue={settings?.target ?? "ALL"}
+                            options={[
+                                { label: 'All Users', value: 'ALL' },
+                                { label: 'Suspicious Only', value: 'SUSPICIOUS' }
+                            ]}
+                        />
                     </div>
                 </div>
 
@@ -160,18 +160,16 @@ export default async function VerificationPage({ params }: { params: { guildId: 
                             </div>
                             <h3 className="font-semibold text-white">Verification Channel</h3>
                         </div>
-                        <div className="relative">
-                            <select name="verificationChannelId" defaultValue={settings?.verificationChannelId ?? ""} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                <option value="">Select a Channel...</option>
-                                {textChannels.map(c => (
-                                    <option key={c.id} value={c.id}>#{c.name}</option>
-                                ))}
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                            </div>
-                        </div>
-                        <p className="text-xs text-gray-500 font-medium">Where the verification prompt will be sent.</p>
+                        <CustomSelect
+                            name="verificationChannelId"
+                            defaultValue={settings?.verificationChannelId ?? ""}
+                            placeholder="Select a Channel..."
+                            options={textChannels.map(c => ({
+                                label: `#${c.name}`,
+                                value: c.id
+                            }))}
+                        />
+                        <p className="text-xs text-gray-500 font-medium pt-2">Where the verification prompt will be sent.</p>
                     </div>
 
                     <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md space-y-4 shadow-lg hover:border-white/20 transition-all">
@@ -181,20 +179,17 @@ export default async function VerificationPage({ params }: { params: { guildId: 
                             </div>
                             <h3 className="font-semibold text-white">Verified Role</h3>
                         </div>
-                        <div className="relative">
-                            <select name="verifiedRoleId" defaultValue={settings?.verifiedRoleId ?? ""} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                <option value="">Select a Role...</option>
-                                {roles.map(r => (
-                                    <option key={r.id} value={r.id} style={{ color: r.color ? `#${r.color.toString(16).padStart(6, '0')}` : 'inherit' }}>
-                                        @{r.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                            </div>
-                        </div>
-                        <p className="text-xs text-gray-500 font-medium">Role given after successful verification.</p>
+                        <CustomSelect
+                            name="verifiedRoleId"
+                            defaultValue={settings?.verifiedRoleId ?? ""}
+                            placeholder="Select a Role..."
+                            options={roles.map(r => ({
+                                label: `@${r.name}`,
+                                value: r.id,
+                                color: r.color ? `#${r.color.toString(16).padStart(6, '0')}` : undefined
+                            }))}
+                        />
+                        <p className="text-xs text-gray-500 font-medium pt-2">Role given after successful verification.</p>
                     </div>
                 </div>
 
@@ -222,11 +217,11 @@ export default async function VerificationPage({ params }: { params: { guildId: 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/5">
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Timeout (Seconds)</label>
-                        <input type="number" name="captchaTimeout" defaultValue={settings?.captchaTimeout ?? 300} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all placeholder-white/20" />
+                        <input type="number" name="captchaTimeout" defaultValue={settings?.captchaTimeout ?? 300} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500/50 outline-none transition-all placeholder-white/20" />
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Max Attempts</label>
-                        <input type="number" name="captchaMaxAttempts" defaultValue={settings?.captchaMaxAttempts ?? 3} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all placeholder-white/20" />
+                        <input type="number" name="captchaMaxAttempts" defaultValue={settings?.captchaMaxAttempts ?? 3} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500/50 outline-none transition-all placeholder-white/20" />
                     </div>
                 </div>
 

@@ -3,6 +3,8 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import CustomSelect from "@/components/ui/CustomSelect";
+import CustomCheckbox from "@/components/ui/CustomCheckbox";
 
 // Server Action to update Join Gate settings
 async function updateJoinGate(formData: FormData) {
@@ -99,7 +101,7 @@ export default async function JoinGatePage({
                         <p className="text-sm text-gray-400">Strictly filter all incoming members</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer group">
-                        <input type="checkbox" name="enabled" className="sr-only peer" defaultChecked={settings?.enabled ?? false} />
+                        <input type="checkbox" name="enabled" className="sr-only peer" defaultChecked={config?.enabled ?? false} />
                         <div className="w-14 h-8 bg-black/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-rose-600 peer-checked:to-red-600 shadow-inner"></div>
                         <div className="absolute inset-0 rounded-full ring-2 ring-white/5 group-hover:ring-white/20 transition-all"></div>
                     </label>
@@ -117,21 +119,20 @@ export default async function JoinGatePage({
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Min Age (Days)</label>
-                            <input type="number" name="accountAgeMinDays" defaultValue={settings?.accountAgeMinDays ?? 7} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500/50 outline-none transition-all placeholder-white/20" />
+                            <input type="number" name="accountAgeMinDays" defaultValue={config?.accountAgeMinDays ?? 7} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500/50 outline-none transition-all placeholder-white/20" />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <div className="relative">
-                                <select name="action_accountAge" defaultValue={activeActions.accountAge} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                    <option value="quarantine">Quarantine</option>
-                                    <option value="kick">Kick</option>
-                                    <option value="ban">Ban</option>
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                </div>
-                            </div>
+                            <CustomSelect
+                                name="action_accountAge"
+                                defaultValue={actions.accountAge}
+                                options={[
+                                    { label: 'Quarantine', value: 'quarantine' },
+                                    { label: 'Kick', value: 'kick' },
+                                    { label: 'Ban', value: 'ban' }
+                                ]}
+                            />
                         </div>
                     </div>
 
@@ -146,26 +147,20 @@ export default async function JoinGatePage({
 
                         <div className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                             <label className="text-sm font-medium text-gray-300">Require Avatar?</label>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="avatarRequired" className="sr-only peer" defaultChecked={settings?.avatarRequired ?? false} />
-                                <div className="w-5 h-5 border-2 border-gray-500 rounded bg-transparent peer-checked:bg-rose-500 peer-checked:border-rose-500 transition-all flex items-center justify-center">
-                                    <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                </div>
-                            </label>
+                            <CustomCheckbox name="avatarRequired" defaultChecked={config?.avatarRequired} />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <div className="relative">
-                                <select name="action_avatar" defaultValue={activeActions.avatar} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                    <option value="quarantine">Quarantine</option>
-                                    <option value="kick">Kick</option>
-                                    <option value="ban">Ban</option>
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                </div>
-                            </div>
+                            <CustomSelect
+                                name="action_avatar"
+                                defaultValue={actions.avatar}
+                                options={[
+                                    { label: 'Quarantine', value: 'quarantine' },
+                                    { label: 'Kick', value: 'kick' },
+                                    { label: 'Ban', value: 'ban' }
+                                ]}
+                            />
                         </div>
                     </div>
 
@@ -180,29 +175,27 @@ export default async function JoinGatePage({
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Policy</label>
-                            <div className="relative">
-                                <select name="botAdditionPolicy" defaultValue={settings?.botAdditionPolicy ?? "allow"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                    <option value="allow">Allow All Bots</option>
-                                    <option value="block">Block All Bots</option>
-                                    <option value="verified_only">Verified Only</option>
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                </div>
-                            </div>
+                            <CustomSelect
+                                name="botAdditionPolicy"
+                                defaultValue={config?.botAdditionPolicy ?? "allow"}
+                                options={[
+                                    { label: 'Allow All Bots', value: 'allow' },
+                                    { label: 'Block All Bots', value: 'block' },
+                                    { label: 'Verified Only', value: 'verified_only' }
+                                ]}
+                            />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <div className="relative">
-                                <select name="action_bot" defaultValue={activeActions.bot} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                    <option value="block">Kick Bot</option>
-                                    <option value="quarantine">Quarantine Inviter</option>
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                </div>
-                            </div>
+                            <CustomSelect
+                                name="action_bot"
+                                defaultValue={actions.bot}
+                                options={[
+                                    { label: 'Kick Bot', value: 'block' },
+                                    { label: 'Quarantine Inviter', value: 'quarantine' }
+                                ]}
+                            />
                         </div>
                     </div>
 
@@ -217,30 +210,28 @@ export default async function JoinGatePage({
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Detection Rule</label>
-                            <div className="relative">
-                                <select name="advertisingProfileRule" defaultValue={settings?.advertisingProfileRule ?? "ignore"} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                    <option value="ignore">Ignore</option>
-                                    <option value="warn">Warn User</option>
-                                    <option value="strict">Strict (Discord Invites)</option>
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                </div>
-                            </div>
+                            <CustomSelect
+                                name="advertisingProfileRule"
+                                defaultValue={config?.advertisingProfileRule ?? "ignore"}
+                                options={[
+                                    { label: 'Ignore', value: 'ignore' },
+                                    { label: 'Warn User', value: 'warn' },
+                                    { label: 'Strict (Discord Invites)', value: 'strict' }
+                                ]}
+                            />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <div className="relative">
-                                <select name="action_advertising" defaultValue={activeActions.advertising} className="w-full appearance-none bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white focus:ring-2 focus:ring-rose-500/50 outline-none transition-all cursor-pointer hover:bg-white/5">
-                                    <option value="quarantine">Quarantine</option>
-                                    <option value="kick">Kick</option>
-                                    <option value="ban">Ban</option>
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                                </div>
-                            </div>
+                            <CustomSelect
+                                name="action_advertising"
+                                defaultValue={actions.advertising}
+                                options={[
+                                    { label: 'Quarantine', value: 'quarantine' },
+                                    { label: 'Kick', value: 'kick' },
+                                    { label: 'Ban', value: 'ban' }
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>
