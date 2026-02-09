@@ -74,11 +74,10 @@ async function updateHeatConfig(formData: FormData) {
     revalidatePath(`/dashboard/${guildId}/moderation`);
 }
 
-export default async function ModerationPage({ params }: { params: { guildId: string } }) {
+export default async function ModerationPage({ params }: { params: Promise<{ guildId: string }> }) {
+    const { guildId } = await params;
     const session = await getServerSession(authOptions);
     if (!session) redirect("/");
-
-    const { guildId } = params;
 
     const config = await prisma.heatConfig.findUnique({
         where: { guildId }

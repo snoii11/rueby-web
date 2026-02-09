@@ -65,11 +65,10 @@ async function updateVerification(formData: FormData) {
     revalidatePath(`/dashboard/${guildId}/verification`);
 }
 
-export default async function VerificationPage({ params }: { params: { guildId: string } }) {
+export default async function VerificationPage({ params }: { params: Promise<{ guildId: string }> }) {
+    const { guildId } = await params;
     const session = await getServerSession(authOptions);
     if (!session) redirect("/");
-
-    const { guildId } = params;
 
     const settings = await prisma.verificationSettings.findUnique({
         where: { guildId }

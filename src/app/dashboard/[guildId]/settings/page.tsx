@@ -34,11 +34,10 @@ async function updateSettings(formData: FormData) {
     revalidatePath(`/dashboard/${guildId}/settings`);
 }
 
-export default async function SettingsPage({ params }: { params: { guildId: string } }) {
+export default async function SettingsPage({ params }: { params: Promise<{ guildId: string }> }) {
+    const { guildId } = await params;
     const session = await getServerSession(authOptions);
     if (!session) redirect("/");
-
-    const { guildId } = params;
 
     const guild = await prisma.guild.findUnique({
         where: { id: guildId }

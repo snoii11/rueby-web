@@ -51,11 +51,10 @@ async function updateLogs(formData: FormData) {
     revalidatePath(`/dashboard/${guildId}/logs`);
 }
 
-export default async function LogsPage({ params }: { params: { guildId: string } }) {
+export default async function LogsPage({ params }: { params: Promise<{ guildId: string }> }) {
+    const { guildId } = await params;
     const session = await getServerSession(authOptions);
     if (!session) redirect("/");
-
-    const { guildId } = params;
 
     const routing = await prisma.logsRouting.findUnique({
         where: { guildId }

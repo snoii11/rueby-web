@@ -53,11 +53,10 @@ async function removePermit(formData: FormData) {
     revalidatePath(`/dashboard/${guildId}/permits`);
 }
 
-export default async function PermitsPage({ params }: { params: { guildId: string } }) {
+export default async function PermitsPage({ params }: { params: Promise<{ guildId: string }> }) {
+    const { guildId } = await params;
     const session = await getServerSession(authOptions);
     if (!session) redirect("/");
-
-    const { guildId } = params;
 
     // Fetch existing permits
     const permits = await prisma.permit.findMany({
