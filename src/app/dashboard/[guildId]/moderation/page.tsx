@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import CustomSelect from "@/components/ui/CustomSelect";
+import PillSelect from "@/components/ui/PillSelect";
 import CustomCheckbox from "@/components/ui/CustomCheckbox";
 
 // Server action to update heat config
@@ -92,10 +92,10 @@ export default async function ModerationPage({ params }: { params: Promise<{ gui
     const actions = config?.actions as any || { T1: "warn", T2: "timeout", T3: "kick", T4: "ban" };
 
     const actionOptions = [
-        { label: "Warn", value: "warn" },
-        { label: "Timeout", value: "timeout" },
-        { label: "Kick", value: "kick" },
-        { label: "Ban", value: "ban" },
+        { label: "Warn", value: "warn", icon: "⚠️" },
+        { label: "Timeout", value: "timeout", icon: "⏰" },
+        { label: "Kick", value: "kick", icon: "👢" },
+        { label: "Ban", value: "ban", icon: "🔨" },
     ];
 
     return (
@@ -168,10 +168,11 @@ export default async function ModerationPage({ params }: { params: Promise<{ gui
                                 </div>
                                 <div className="flex-1 w-full space-y-2">
                                     <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action</label>
-                                    <CustomSelect
+                                    <PillSelect
                                         name={`a_${tier}`}
                                         defaultValue={actions[tier]}
                                         options={actionOptions}
+                                        columns={4}
                                     />
                                 </div>
                             </div>

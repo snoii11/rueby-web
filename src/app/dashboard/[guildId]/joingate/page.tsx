@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import CustomSelect from "@/components/ui/CustomSelect";
+import PillSelect from "@/components/ui/PillSelect";
 import CustomCheckbox from "@/components/ui/CustomCheckbox";
 
 // Server Action to update Join Gate settings
@@ -124,13 +124,14 @@ export default async function JoinGatePage({
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <CustomSelect
+                            <PillSelect
                                 name="action_accountAge"
                                 defaultValue={actions.accountAge}
+                                columns={3}
                                 options={[
-                                    { label: 'Quarantine', value: 'quarantine' },
-                                    { label: 'Kick', value: 'kick' },
-                                    { label: 'Ban', value: 'ban' }
+                                    { label: 'Quarantine', value: 'quarantine', icon: '🔒' },
+                                    { label: 'Kick', value: 'kick', icon: '👢' },
+                                    { label: 'Ban', value: 'ban', icon: '🔨' }
                                 ]}
                             />
                         </div>
@@ -152,13 +153,14 @@ export default async function JoinGatePage({
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <CustomSelect
+                            <PillSelect
                                 name="action_avatar"
                                 defaultValue={actions.avatar}
+                                columns={3}
                                 options={[
-                                    { label: 'Quarantine', value: 'quarantine' },
-                                    { label: 'Kick', value: 'kick' },
-                                    { label: 'Ban', value: 'ban' }
+                                    { label: 'Quarantine', value: 'quarantine', icon: '🔒' },
+                                    { label: 'Kick', value: 'kick', icon: '👢' },
+                                    { label: 'Ban', value: 'ban', icon: '🔨' }
                                 ]}
                             />
                         </div>
@@ -175,25 +177,27 @@ export default async function JoinGatePage({
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Policy</label>
-                            <CustomSelect
+                            <PillSelect
                                 name="botAdditionPolicy"
                                 defaultValue={config?.botAdditionPolicy ?? "allow"}
+                                columns={3}
                                 options={[
-                                    { label: 'Allow All Bots', value: 'allow' },
-                                    { label: 'Block All Bots', value: 'block' },
-                                    { label: 'Verified Only', value: 'verified_only' }
+                                    { label: 'Allow All', value: 'allow', icon: '✅' },
+                                    { label: 'Block All', value: 'block', icon: '🚫' },
+                                    { label: 'Verified Only', value: 'verified_only', icon: '✓' }
                                 ]}
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <CustomSelect
+                            <PillSelect
                                 name="action_bot"
                                 defaultValue={actions.bot}
+                                columns={2}
                                 options={[
-                                    { label: 'Kick Bot', value: 'block' },
-                                    { label: 'Quarantine Inviter', value: 'quarantine' }
+                                    { label: 'Kick Bot', value: 'block', icon: '🤖' },
+                                    { label: 'Quarantine Inviter', value: 'quarantine', icon: '🔒' }
                                 ]}
                             />
                         </div>
@@ -210,26 +214,28 @@ export default async function JoinGatePage({
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Detection Rule</label>
-                            <CustomSelect
+                            <PillSelect
                                 name="advertisingProfileRule"
                                 defaultValue={config?.advertisingProfileRule ?? "ignore"}
+                                columns={3}
                                 options={[
-                                    { label: 'Ignore', value: 'ignore' },
-                                    { label: 'Warn User', value: 'warn' },
-                                    { label: 'Strict (Discord Invites)', value: 'strict' }
+                                    { label: 'Ignore', value: 'ignore', icon: '👀' },
+                                    { label: 'Warn', value: 'warn', icon: '⚠️' },
+                                    { label: 'Strict', value: 'strict', icon: '🚨' }
                                 ]}
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Action on Fail</label>
-                            <CustomSelect
+                            <PillSelect
                                 name="action_advertising"
                                 defaultValue={actions.advertising}
+                                columns={3}
                                 options={[
-                                    { label: 'Quarantine', value: 'quarantine' },
-                                    { label: 'Kick', value: 'kick' },
-                                    { label: 'Ban', value: 'ban' }
+                                    { label: 'Quarantine', value: 'quarantine', icon: '🔒' },
+                                    { label: 'Kick', value: 'kick', icon: '👢' },
+                                    { label: 'Ban', value: 'ban', icon: '🔨' }
                                 ]}
                             />
                         </div>
