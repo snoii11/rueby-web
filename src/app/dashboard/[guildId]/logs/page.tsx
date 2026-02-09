@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { REST } from "@discordjs/rest";
 import { Routes, APIChannel, ChannelType } from "discord-api-types/v10";
-import CustomSelect from "@/components/ui/CustomSelect";
+import ChannelSelect from "@/components/ui/ChannelSelect";
 
 // Server action to update logs routing
 async function updateLogs(formData: FormData) {
@@ -82,8 +82,9 @@ export default async function LogsPage({ params }: { params: Promise<{ guildId: 
     const textChannels = channels
         .filter(c => c.type === ChannelType.GuildText)
         .map(c => ({
-            label: `#${c.name}`,
-            value: c.id
+            label: c.name,
+            value: c.id,
+            type: 'text' as const
         }));
 
     const LogCategory = ({ title, icon, color, items }: any) => (
@@ -98,12 +99,10 @@ export default async function LogsPage({ params }: { params: Promise<{ guildId: 
                 {items.map((item: any) => (
                     <div key={item.key} className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">{item.label}</label>
-                        <CustomSelect
+                        <ChannelSelect
                             name={item.key}
                             defaultValue={routing?.[item.key as keyof typeof routing] as string ?? ""}
-                            placeholder="Select a Channel..."
-                            options={textChannels}
-                            icon={<span className="text-gray-500">#</span>}
+                            channels={textChannels}
                         />
                     </div>
                 ))}
@@ -166,11 +165,10 @@ export default async function LogsPage({ params }: { params: Promise<{ guildId: 
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Default Channel</label>
-                        <CustomSelect
+                        <ChannelSelect
                             name="fallbackChannelId"
                             defaultValue={routing?.fallbackChannelId ?? ""}
-                            placeholder="Select a Channel..."
-                            options={textChannels}
+                            channels={textChannels}
                         />
                         <p className="text-xs text-gray-500">Used if a specific route is not configured.</p>
                     </div>

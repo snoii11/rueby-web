@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { REST } from "@discordjs/rest";
 import { Routes, APIRole } from "discord-api-types/v10";
-import CustomSelect from "@/components/ui/CustomSelect";
+import PillSelect from "@/components/ui/PillSelect";
+import RoleSelect from "@/components/ui/RoleSelect";
 
 // Server action to update settings
 async function updateSettings(formData: FormData) {
@@ -65,7 +66,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ guild
     }
 
     const roleOptions = roles.map(r => ({
-        label: `@${r.name}`,
+        label: r.name,
         value: r.id,
         color: r.color ? `#${r.color.toString(16).padStart(6, '0')}` : undefined
     }));
@@ -102,19 +103,20 @@ export default async function SettingsPage({ params }: { params: Promise<{ guild
                         {/* Timezone */}
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Timezone</label>
-                            <CustomSelect
+                            <PillSelect
                                 name="timezone"
                                 defaultValue={guild.timezone}
+                                columns={3}
                                 options={[
                                     { label: 'UTC', value: 'UTC' },
-                                    { label: 'EST (UTC-5)', value: 'America/New_York' },
-                                    { label: 'PST (UTC-8)', value: 'America/Los_Angeles' },
-                                    { label: 'CST (UTC-6)', value: 'America/Chicago' },
-                                    { label: 'GMT (UTC+0)', value: 'Europe/London' },
-                                    { label: 'CET (UTC+1)', value: 'Europe/Paris' },
-                                    { label: 'IST (UTC+5:30)', value: 'Asia/Kolkata' },
-                                    { label: 'JST (UTC+9)', value: 'Asia/Tokyo' },
-                                    { label: 'AEST (UTC+10)', value: 'Australia/Sydney' },
+                                    { label: 'EST', value: 'America/New_York' },
+                                    { label: 'PST', value: 'America/Los_Angeles' },
+                                    { label: 'CST', value: 'America/Chicago' },
+                                    { label: 'GMT', value: 'Europe/London' },
+                                    { label: 'CET', value: 'Europe/Paris' },
+                                    { label: 'IST', value: 'Asia/Kolkata' },
+                                    { label: 'JST', value: 'Asia/Tokyo' },
+                                    { label: 'AEST', value: 'Australia/Sydney' },
                                 ]}
                             />
                         </div>
@@ -126,11 +128,10 @@ export default async function SettingsPage({ params }: { params: Promise<{ guild
                         {/* Mute Role */}
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Mute Role</label>
-                            <CustomSelect
+                            <RoleSelect
                                 name="muteRole"
                                 defaultValue={guild.muteRole || ""}
-                                placeholder="Select a Role..."
-                                options={roleOptions}
+                                roles={roleOptions}
                             />
                             <p className="text-xs text-gray-500">Role assigned when a user is muted.</p>
                         </div>
@@ -138,11 +139,10 @@ export default async function SettingsPage({ params }: { params: Promise<{ guild
                         {/* Quarantine Role */}
                         <div className="space-y-2">
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Quarantine Role</label>
-                            <CustomSelect
+                            <RoleSelect
                                 name="quarantineRole"
                                 defaultValue={guild.quarantineRole || ""}
-                                placeholder="Select a Role..."
-                                options={roleOptions}
+                                roles={roleOptions}
                             />
                             <p className="text-xs text-gray-500">Role assigned when a user is flagged by security systems.</p>
                         </div>

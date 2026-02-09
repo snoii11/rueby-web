@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { REST } from "@discordjs/rest";
 import { Routes, APIRole } from "discord-api-types/v10";
-import CustomSelect from "@/components/ui/CustomSelect";
+import RoleSelect from "@/components/ui/RoleSelect";
+import PillSelect from "@/components/ui/PillSelect";
 
 // Server action to add permit
 async function addPermit(formData: FormData) {
@@ -96,17 +97,17 @@ export default async function PermitsPage({ params }: { params: Promise<{ guildI
     const availableRoles = roles
         .filter(r => !permits.some(p => p.roleId === r.id) && r.name !== "@everyone")
         .map(r => ({
-            label: `@${r.name}`,
+            label: r.name,
             value: r.id,
             color: r.color ? `#${r.color.toString(16).padStart(6, '0')}` : undefined
         }));
 
     const levelOptions = [
-        { label: "L5 - Owner / Extra Owner", value: "L5" },
-        { label: "L4 - Trusted Admin", value: "L4" },
-        { label: "L3 - Senior Moderator", value: "L3" },
-        { label: "L2 - Moderator", value: "L2" },
-        { label: "L1 - Helper", value: "L1" },
+        { label: "L5 - Owner", value: "L5", icon: "👑" },
+        { label: "L4 - Admin", value: "L4", icon: "⚡" },
+        { label: "L3 - Senior", value: "L3", icon: "🛡️" },
+        { label: "L2 - Mod", value: "L2", icon: "🔨" },
+        { label: "L1 - Helper", value: "L1", icon: "🤝" },
     ];
 
     return (
@@ -131,19 +132,18 @@ export default async function PermitsPage({ params }: { params: Promise<{ guildI
 
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Role</label>
-                        <CustomSelect
+                        <RoleSelect
                             name="roleId"
-                            placeholder="Select a Role..."
-                            options={availableRoles}
+                            roles={availableRoles}
                         />
                     </div>
 
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Access Level</label>
-                        <CustomSelect
+                        <PillSelect
                             name="level"
-                            placeholder="Select Level..."
                             options={levelOptions}
+                            columns={3}
                         />
                     </div>
 

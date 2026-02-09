@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { REST } from "@discordjs/rest";
 import { Routes, APIChannel, APIRole, ChannelType } from "discord-api-types/v10";
 import { revalidatePath } from "next/cache";
-import CustomSelect from "@/components/ui/CustomSelect";
+import PillSelect from "@/components/ui/PillSelect";
+import ChannelSelect from "@/components/ui/ChannelSelect";
+import RoleSelect from "@/components/ui/RoleSelect";
 import CustomCheckbox from "@/components/ui/CustomCheckbox";
 
 async function updateVerification(formData: FormData) {
@@ -156,14 +158,15 @@ export default async function VerificationPage({ params }: { params: Promise<{ g
                             </div>
                             <h3 className="font-semibold text-white">Verification Mode</h3>
                         </div>
-                        <CustomSelect
+                        <PillSelect
                             name="mode"
                             defaultValue={settings?.mode ?? "BUTTON"}
+                            columns={2}
                             options={[
-                                { label: 'Button Interaction', value: 'BUTTON' },
-                                { label: 'Captcha Image', value: 'CAPTCHA' },
-                                { label: 'Web Portal (Coming Soon)', value: 'WEB' },
-                                { label: 'None', value: 'NONE' }
+                                { label: 'Button', value: 'BUTTON', icon: '🔘' },
+                                { label: 'Captcha', value: 'CAPTCHA', icon: '🔐' },
+                                { label: 'Web Portal', value: 'WEB', icon: '🌐' },
+                                { label: 'None', value: 'NONE', icon: '⏸️' }
                             ]}
                         />
                     </div>
@@ -174,12 +177,13 @@ export default async function VerificationPage({ params }: { params: Promise<{ g
                             </div>
                             <h3 className="font-semibold text-white">Target Range</h3>
                         </div>
-                        <CustomSelect
+                        <PillSelect
                             name="target"
                             defaultValue={settings?.target ?? "ALL"}
+                            columns={2}
                             options={[
-                                { label: 'All Users', value: 'ALL' },
-                                { label: 'Suspicious Only', value: 'SUSPICIOUS' }
+                                { label: 'All Users', value: 'ALL', icon: '👥' },
+                                { label: 'Suspicious Only', value: 'SUSPICIOUS', icon: '🔍' }
                             ]}
                         />
                     </div>
@@ -194,13 +198,13 @@ export default async function VerificationPage({ params }: { params: Promise<{ g
                             </div>
                             <h3 className="font-semibold text-white">Verification Channel</h3>
                         </div>
-                        <CustomSelect
+                        <ChannelSelect
                             name="verificationChannelId"
                             defaultValue={settings?.verificationChannelId ?? ""}
-                            placeholder="Select a Channel..."
-                            options={textChannels.map(c => ({
-                                label: `#${c.name}`,
-                                value: c.id
+                            channels={textChannels.map(c => ({
+                                label: c.name,
+                                value: c.id,
+                                type: c.type === 0 ? 'text' : c.type === 2 ? 'voice' : 'announcement'
                             }))}
                         />
                         <p className="text-xs text-gray-500 font-medium pt-2">Where the verification prompt will be sent.</p>
@@ -213,12 +217,11 @@ export default async function VerificationPage({ params }: { params: Promise<{ g
                             </div>
                             <h3 className="font-semibold text-white">Verified Role</h3>
                         </div>
-                        <CustomSelect
+                        <RoleSelect
                             name="verifiedRoleId"
                             defaultValue={settings?.verifiedRoleId ?? ""}
-                            placeholder="Select a Role..."
-                            options={roles.map(r => ({
-                                label: `@${r.name}`,
+                            roles={roles.map(r => ({
+                                label: r.name,
                                 value: r.id,
                                 color: r.color ? `#${r.color.toString(16).padStart(6, '0')}` : undefined
                             }))}
