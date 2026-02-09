@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import CustomSelect from '@/components/ui/CustomSelect';
+
 
 interface Role {
     id: string;
@@ -69,49 +69,74 @@ export default function PermitsStep({ data, onChange, roles }: PermitsStepProps)
             <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
                 <h3 className="font-semibold text-white">Add Staff Role</h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-6">
                     {/* Role Selector */}
-                    <div className="space-y-2">
-                        <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Role</label>
-                        <CustomSelect
-                            name="roleSelector"
-                            placeholder="Select a role..."
-                            defaultValue={selectedRole}
-                            onChange={setSelectedRole}
-                            options={availableRoles.map(role => ({
-                                label: `@${role.name}`,
-                                value: role.id,
-                                color: getColorHex(role.color)
-                            }))}
-                        />
+                    <div className="space-y-3">
+                        <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Select Staff Role</label>
+                        <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-xl border border-white/10 max-h-40 overflow-y-auto">
+                            {availableRoles.length === 0 ? (
+                                <p className="text-white/40 text-sm p-2">No available roles found</p>
+                            ) : availableRoles.map((role) => (
+                                <button
+                                    key={role.id}
+                                    type="button"
+                                    onClick={() => setSelectedRole(role.id)}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedRole === role.id
+                                        ? 'ring-2 ring-white/50 shadow-lg scale-105'
+                                        : 'hover:scale-105'
+                                        }`}
+                                    style={{
+                                        backgroundColor: selectedRole === role.id
+                                            ? `${getColorHex(role.color)}40`
+                                            : 'rgba(0,0,0,0.3)',
+                                        color: selectedRole === role.id
+                                            ? getColorHex(role.color)
+                                            : 'rgba(255,255,255,0.7)'
+                                    }}
+                                >
+                                    <span
+                                        className="w-2.5 h-2.5 rounded-full"
+                                        style={{ backgroundColor: getColorHex(role.color) }}
+                                    />
+                                    {role.name}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Level Selector */}
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Permission Level</label>
-                        <CustomSelect
-                            name="levelSelector"
-                            defaultValue={selectedLevel.toString()}
-                            onChange={(val) => setSelectedLevel(parseInt(val))}
-                            options={levels.map(level => ({
-                                label: level.label,
-                                value: level.value.toString()
-                            }))}
-                        />
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                            {levels.map((level) => (
+                                <button
+                                    key={level.value}
+                                    type="button"
+                                    onClick={() => setSelectedLevel(level.value)}
+                                    className={`p-3 rounded-xl transition-all text-center ${selectedLevel === level.value
+                                        ? 'bg-gradient-to-br from-amber-600 to-orange-600 text-white shadow-lg'
+                                        : 'bg-black/30 text-white/70 border border-white/10 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <div className="font-bold text-lg mb-1">L{level.value}</div>
+                                    <div className="text-xs opacity-80 whitespace-nowrap overflow-hidden text-ellipsis">{level.label.split(' - ')[1]}</div>
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                <button
-                    type="button"
-                    onClick={addPermit}
-                    disabled={!selectedRole}
-                    className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${selectedRole
-                        ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white hover:from-rose-500 hover:to-red-500'
-                        : 'bg-white/10 text-white/30 cursor-not-allowed'
-                        }`}
-                >
-                    <span>➕</span> Add Permit
-                </button>
+                    <button
+                        type="button"
+                        onClick={addPermit}
+                        disabled={!selectedRole}
+                        className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mt-4 ${selectedRole
+                            ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white hover:from-rose-500 hover:to-red-500 shadow-lg shadow-rose-500/20'
+                            : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'
+                            }`}
+                    >
+                        <span>➕</span> Add Staff Permit
+                    </button>
+                </div>
             </div>
 
             {/* Current Permits */}
