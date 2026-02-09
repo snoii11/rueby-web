@@ -37,14 +37,21 @@ export default function CustomSelect({ name, options, defaultValue, placeholder 
         }
     }, [isOpen]);
 
-    // Close on click outside or escape
+    // Close on escape or scroll
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
             if (e.key === 'Escape') setIsOpen(false);
         }
+        function handleScroll() {
+            if (isOpen) setIsOpen(false);
+        }
         document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, []);
+        window.addEventListener("scroll", handleScroll, true); // capture phase to catch all scrolls
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("scroll", handleScroll, true);
+        };
+    }, [isOpen]);
 
     const handleSelect = (value: string) => {
         setSelected(value);
