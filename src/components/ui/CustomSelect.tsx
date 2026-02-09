@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, createPortal } from 'react';
+import ReactDOM from 'react-dom';
 
 interface Option {
     label: string;
@@ -19,18 +20,30 @@ interface CustomSelectProps {
 export default function CustomSelect({ name, options, defaultValue, placeholder = "Select...", icon }: CustomSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState(defaultValue || "");
-    const containerRef = useRef<HTMLDivElement>(null);
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const selectedOption = options.find(opt => opt.value === selected);
 
+    // Update dropdown position when opening
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
+        if (isOpen && triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            setDropdownPosition({
+                top: rect.bottom + window.scrollY + 8,
+                left: rect.left + window.scrollX,
+                width: rect.width
+            });
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isOpen]);
+
+    // Close on click outside or escape
+    useEffect(() => {
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.key === 'Escape') setIsOpen(false);
+        }
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
     }, []);
 
     const handleSelect = (value: string) => {
@@ -38,12 +51,84 @@ export default function CustomSelect({ name, options, defaultValue, placeholder 
         setIsOpen(false);
     };
 
+    // Dropdown rendered via portal
+    const dropdownMenu = isOpen && typeof window !== 'undefined' ? ReactDOM.createPortal(
+        <>
+            {/* Full-screen invisible backdrop */}
+            <div
+                className="fixed inset-0 bg-transparent"
+                style={{ zIndex: 99998 }}
+                onClick={() => setIsOpen(false)}
+            />
+
+            {/* Dropdown Menu */}
+            <div
+                className="fixed py-2 rounded-xl overflow-hidden"
+                style={{
+                    zIndex: 99999,
+                    top: dropdownPosition.top,
+                    left: dropdownPosition.left,
+                    width: dropdownPosition.width,
+                    background: 'linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)',
+                    border: '1px solid rgba(244, 63, 94, 0.5)',
+                    boxShadow: `
+                        0 25px 80px -15px rgba(0, 0, 0, 0.95),
+                        0 0 40px -10px rgba(244, 63, 94, 0.2)
+                    `,
+                }}
+            >
+                <div className="max-h-56 overflow-y-auto">
+                    {options.length === 0 ? (
+                        <div className="px-4 py-3 text-white/40 text-sm text-center">
+                            No options available
+                        </div>
+                    ) : (
+                        options.map((opt) => (
+                            <div
+                                key={opt.value}
+                                onClick={() => handleSelect(opt.value)}
+                                className={`
+                                    px-4 py-2.5 cursor-pointer flex items-center justify-between
+                                    transition-all duration-150
+                                    ${selected === opt.value
+                                        ? 'bg-rose-500/20 text-rose-300'
+                                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                                    }
+                                `}
+                            >
+                                <div className="flex items-center gap-2">
+                                    {opt.color && (
+                                        <span
+                                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                            style={{ backgroundColor: opt.color }}
+                                        />
+                                    )}
+                                    <span className="font-medium text-sm">
+                                        {opt.label}
+                                    </span>
+                                </div>
+
+                                {selected === opt.value && (
+                                    <svg className="w-4 h-4 text-rose-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </>,
+        document.body
+    ) : null;
+
     return (
-        <div className="relative w-full" ref={containerRef}>
+        <div className="relative w-full">
             <input type="hidden" name={name} value={selected} />
 
             {/* Trigger Button */}
             <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
@@ -81,78 +166,7 @@ export default function CustomSelect({ name, options, defaultValue, placeholder 
                 </svg>
             </button>
 
-            {/* Dropdown Portal */}
-            {isOpen && (
-                <>
-                    {/* Invisible backdrop to catch clicks */}
-                    <div
-                        className="fixed inset-0"
-                        style={{ zIndex: 9998 }}
-                        onClick={() => setIsOpen(false)}
-                    />
-
-                    {/* Dropdown Menu */}
-                    <div
-                        className="absolute left-0 w-full mt-2 py-2 rounded-xl overflow-hidden"
-                        style={{
-                            zIndex: 9999,
-                            background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
-                            border: '1px solid rgba(244, 63, 94, 0.4)',
-                            boxShadow: `
-                                0 20px 60px -10px rgba(0, 0, 0, 0.9),
-                                0 0 30px -5px rgba(244, 63, 94, 0.15),
-                                inset 0 1px 0 rgba(255, 255, 255, 0.05)
-                            `,
-                        }}
-                    >
-                        <div className="max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-rose-500/30 scrollbar-track-transparent">
-                            {options.length === 0 ? (
-                                <div className="px-4 py-3 text-white/40 text-sm text-center">
-                                    No options available
-                                </div>
-                            ) : (
-                                options.map((opt, index) => (
-                                    <div
-                                        key={opt.value}
-                                        onClick={() => handleSelect(opt.value)}
-                                        className={`
-                                            px-4 py-2.5 cursor-pointer flex items-center justify-between
-                                            transition-all duration-150 relative
-                                            ${selected === opt.value
-                                                ? 'bg-rose-500/20 text-rose-300'
-                                                : 'text-white/80 hover:bg-white/5 hover:text-white'
-                                            }
-                                            ${index === 0 ? 'rounded-t-lg' : ''}
-                                            ${index === options.length - 1 ? 'rounded-b-lg' : ''}
-                                        `}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {opt.color && (
-                                                <span
-                                                    className="w-2 h-2 rounded-full"
-                                                    style={{ backgroundColor: opt.color }}
-                                                />
-                                            )}
-                                            <span
-                                                className="font-medium text-sm"
-                                                style={{ color: opt.color || undefined }}
-                                            >
-                                                {opt.label}
-                                            </span>
-                                        </div>
-
-                                        {selected === opt.value && (
-                                            <svg className="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                            </svg>
-                                        )}
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-                </>
-            )}
+            {dropdownMenu}
         </div>
     );
 }
