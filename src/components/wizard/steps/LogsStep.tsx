@@ -1,5 +1,7 @@
 "use client";
 
+import ChannelSelect from '@/components/ui/ChannelSelect';
+
 interface Channel {
     id: string;
     name: string;
@@ -25,7 +27,13 @@ const logTypes = [
 ];
 
 export default function LogsStep({ data, onChange, channels }: LogsStepProps) {
-    const textChannels = channels.filter(c => c.type === 0);
+    const textChannels = channels
+        .filter(c => c.type === 0)
+        .map(c => ({
+            label: c.name,
+            value: c.id,
+            type: 'text' as const
+        }));
 
     return (
         <div className="space-y-8">
@@ -50,18 +58,15 @@ export default function LogsStep({ data, onChange, channels }: LogsStepProps) {
                                 <h3 className="font-semibold text-white">{log.label}</h3>
                                 <p className="text-xs text-white/50">{log.desc}</p>
                             </div>
-                            <select
-                                value={(data as any)[log.key] || ''}
-                                onChange={(e) => onChange(log.key, e.target.value)}
-                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:ring-2 focus:ring-rose-500/50 outline-none min-w-[150px]"
-                            >
-                                <option value="">None</option>
-                                {textChannels.map((channel) => (
-                                    <option key={channel.id} value={channel.id}>
-                                        #{channel.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="w-[200px]">
+                                <ChannelSelect
+                                    name={log.key}
+                                    channels={textChannels}
+                                    defaultValue={(data as any)[log.key] || ''}
+                                    onChange={(val) => onChange(log.key, val)}
+                                    placeholder="None"
+                                />
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -69,28 +74,23 @@ export default function LogsStep({ data, onChange, channels }: LogsStepProps) {
 
             {/* Quick Assign */}
             <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-xl border border-purple-500/20 p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                     <div>
                         <h3 className="font-semibold text-white">Quick Assign</h3>
                         <p className="text-sm text-white/50">Send all logs to one channel</p>
                     </div>
-                    <select
-                        onChange={(e) => {
-                            const channelId = e.target.value;
-                            if (channelId) {
-                                logTypes.forEach(log => onChange(log.key, channelId));
-                            }
-                            e.target.value = '';
-                        }}
-                        className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:ring-2 focus:ring-rose-500/50 outline-none"
-                    >
-                        <option value="">Select channel...</option>
-                        {textChannels.map((channel) => (
-                            <option key={channel.id} value={channel.id}>
-                                #{channel.name}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="w-[200px]">
+                        <ChannelSelect
+                            name="quickAssign"
+                            channels={textChannels}
+                            placeholder="Select channel..."
+                            onChange={(val) => {
+                                if (val) {
+                                    logTypes.forEach(log => onChange(log.key, val));
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

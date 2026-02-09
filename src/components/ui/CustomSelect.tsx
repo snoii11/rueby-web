@@ -15,13 +15,21 @@ interface CustomSelectProps {
     defaultValue?: string;
     placeholder?: string;
     icon?: React.ReactNode;
+    onChange?: (value: string) => void;
 }
 
-export default function CustomSelect({ name, options, defaultValue, placeholder = "Select...", icon }: CustomSelectProps) {
+export default function CustomSelect({ name, options, defaultValue, placeholder = "Select...", icon, onChange }: CustomSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState(defaultValue || "");
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const triggerRef = useRef<HTMLButtonElement>(null);
+
+    // Sync with external defaultValue if it changes (for controlled behavior)
+    useEffect(() => {
+        if (defaultValue !== undefined) {
+            setSelected(defaultValue);
+        }
+    }, [defaultValue]);
 
     const selectedOption = options.find(opt => opt.value === selected);
 
@@ -55,6 +63,7 @@ export default function CustomSelect({ name, options, defaultValue, placeholder 
 
     const handleSelect = (value: string) => {
         setSelected(value);
+        if (onChange) onChange(value);
         setIsOpen(false);
     };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface Role {
     id: string;
@@ -72,34 +73,31 @@ export default function PermitsStep({ data, onChange, roles }: PermitsStepProps)
                     {/* Role Selector */}
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Role</label>
-                        <select
-                            value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 outline-none"
-                        >
-                            <option value="">Select a role...</option>
-                            {availableRoles.map((role) => (
-                                <option key={role.id} value={role.id}>
-                                    @{role.name}
-                                </option>
-                            ))}
-                        </select>
+                        <CustomSelect
+                            name="roleSelector"
+                            placeholder="Select a role..."
+                            defaultValue={selectedRole}
+                            onChange={setSelectedRole}
+                            options={availableRoles.map(role => ({
+                                label: `@${role.name}`,
+                                value: role.id,
+                                color: getColorHex(role.color)
+                            }))}
+                        />
                     </div>
 
                     {/* Level Selector */}
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-white/50 font-bold">Permission Level</label>
-                        <select
-                            value={selectedLevel}
-                            onChange={(e) => setSelectedLevel(parseInt(e.target.value))}
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 outline-none"
-                        >
-                            {levels.map((level) => (
-                                <option key={level.value} value={level.value}>
-                                    {level.label}
-                                </option>
-                            ))}
-                        </select>
+                        <CustomSelect
+                            name="levelSelector"
+                            defaultValue={selectedLevel.toString()}
+                            onChange={(val) => setSelectedLevel(parseInt(val))}
+                            options={levels.map(level => ({
+                                label: level.label,
+                                value: level.value.toString()
+                            }))}
+                        />
                     </div>
                 </div>
 
@@ -108,8 +106,8 @@ export default function PermitsStep({ data, onChange, roles }: PermitsStepProps)
                     onClick={addPermit}
                     disabled={!selectedRole}
                     className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${selectedRole
-                            ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white hover:from-rose-500 hover:to-red-500'
-                            : 'bg-white/10 text-white/30 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white hover:from-rose-500 hover:to-red-500'
+                        : 'bg-white/10 text-white/30 cursor-not-allowed'
                         }`}
                 >
                     <span>➕</span> Add Permit

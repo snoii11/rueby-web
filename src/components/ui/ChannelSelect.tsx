@@ -13,10 +13,18 @@ interface ChannelSelectProps {
     channels: Channel[];
     defaultValue?: string;
     placeholder?: string;
+    onChange?: (value: string) => void;
 }
 
-export default function ChannelSelect({ name, channels, defaultValue, placeholder = "Select a channel..." }: ChannelSelectProps) {
+export default function ChannelSelect({ name, channels, defaultValue, placeholder = "Select a channel...", onChange }: ChannelSelectProps) {
     const [selected, setSelected] = useState(defaultValue || "");
+
+    // Sync with external defaultValue
+    // Note: We use a separate useEffect to update state when prop changes
+    // But be careful not to cause infinite loops if onChange updates defaultValue
+    if (defaultValue !== undefined && selected !== defaultValue) {
+        setSelected(defaultValue);
+    }
 
     const getIcon = (type?: string) => {
         switch (type) {
@@ -58,7 +66,10 @@ export default function ChannelSelect({ name, channels, defaultValue, placeholde
                         <button
                             key={channel.value}
                             type="button"
-                            onClick={() => setSelected(channel.value)}
+                            onClick={() => {
+                                setSelected(channel.value);
+                                if (onChange) onChange(channel.value);
+                            }}
                             className={`
                                 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
                                 transition-all duration-150
