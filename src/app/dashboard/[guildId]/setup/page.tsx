@@ -104,6 +104,20 @@ async function saveWizardSettings(formData: FormData) {
             });
         }
 
+        // Automatic Verification Setup
+        if (settings.verification.enabled) {
+            // Import dynamically to avoid circular dependencies if any, though here it's fine
+            const { sendVerificationPanel, setupVerificationPermissions } = await import("@/actions/verification");
+
+            // Send Panel
+            await sendVerificationPanel(guildId);
+
+            // Setup Permissions if requested
+            if (settings.verification.lockdown) {
+                await setupVerificationPermissions(guildId);
+            }
+        }
+
         revalidatePath(`/dashboard/${guildId}`);
         return { success: true };
     } catch (err: any) {
@@ -166,7 +180,9 @@ export default async function SetupWizardPage({
             mode: verification?.mode || "BUTTON",
             channelId: verification?.verificationChannelId || "",
             roleId: verification?.verifiedRoleId || "",
+
             failAction: verification?.actionOnFail?.toLowerCase() || "none",
+            lockdown: false,
         },
         joinGate: {
             enabled: joinGate?.enabled ?? false,

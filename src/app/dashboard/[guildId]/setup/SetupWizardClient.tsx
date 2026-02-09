@@ -31,6 +31,7 @@ interface WizardData {
         channelId: string;
         roleId: string;
         failAction: string;
+        lockdown?: boolean;
     };
     joinGate: {
         enabled: boolean;

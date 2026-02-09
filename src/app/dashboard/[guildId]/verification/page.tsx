@@ -9,6 +9,7 @@ import PillSelect from "@/components/ui/PillSelect";
 import ChannelSelect from "@/components/ui/ChannelSelect";
 import RoleSelect from "@/components/ui/RoleSelect";
 import CustomCheckbox from "@/components/ui/CustomCheckbox";
+import VerificationActions from "@/components/dashboard/VerificationActions";
 
 async function updateVerification(formData: FormData) {
     "use server";
@@ -260,6 +261,12 @@ export default async function VerificationPage({ params }: { params: Promise<{ g
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-bold">Max Attempts</label>
                         <input type="number" name="captchaMaxAttempts" defaultValue={settings?.captchaMaxAttempts ?? 3} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500/50 outline-none transition-all placeholder-white/20" />
                     </div>
+                </div>
+
+                {/* Actions */}
+                <div className="pt-4 border-t border-white/5">
+                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Quick Actions</h3>
+                    <VerificationActions guildId={guildId} />
                 </div>
 
                 <div className="pt-6">
