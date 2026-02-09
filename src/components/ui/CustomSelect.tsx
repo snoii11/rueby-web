@@ -72,8 +72,14 @@ export default function CustomSelect({ name, options, defaultValue, placeholder 
 
             {/* Dropdown Options */}
             {isOpen && (
-                <div className="absolute left-0 right-0 z-[100] w-full mt-1 bg-[#0d0d0d]/95 border border-rose-500/30 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl"
-                    style={{ top: '100%' }}>
+                <div
+                    className="absolute left-0 right-0 w-full mt-1 bg-[#0d0d0d] border-2 border-rose-500/50 rounded-xl overflow-hidden max-h-60 overflow-y-auto"
+                    style={{
+                        top: '100%',
+                        zIndex: 9999,
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(225, 29, 72, 0.3)'
+                    }}
+                >
                     <div className="py-1">
                         {options.map((opt) => (
                             <div
