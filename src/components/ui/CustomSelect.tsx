@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, createPortal } from 'react';
-import ReactDOM from 'react-dom';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Option {
     label: string;
@@ -52,7 +52,7 @@ export default function CustomSelect({ name, options, defaultValue, placeholder 
     };
 
     // Dropdown rendered via portal
-    const dropdownMenu = isOpen && typeof window !== 'undefined' ? ReactDOM.createPortal(
+    const dropdownMenu = isOpen && typeof window !== 'undefined' ? createPortal(
         <>
             {/* Full-screen invisible backdrop */}
             <div
