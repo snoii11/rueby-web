@@ -114,8 +114,15 @@ export default async function VerificationPage({ params }: { params: Promise<{ g
         );
     }
 
-    // Filter text channels
-    const textChannels = channels.filter(c => c.type === ChannelType.GuildText);
+    // Filter text-based channels (text, announcements, voice, etc.)
+    const textChannels = channels.filter(c =>
+        c.type === ChannelType.GuildText ||
+        c.type === ChannelType.GuildAnnouncement ||
+        c.type === ChannelType.GuildVoice
+    );
+
+    // Debug: Log counts (will show in Vercel logs)
+    console.log(`[Verification Page] Guild ${guildId}: ${channels.length} channels fetched, ${textChannels.length} after filter, ${roles.length} roles`);
 
     return (
         <div className="space-y-6">
