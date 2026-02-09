@@ -10,6 +10,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
+    { id: "setup", label: "Setup Wizard", icon: "⚡", href: "/setup" },
     { id: "overview", label: "Overview", icon: "📊", href: "" },
     { id: "antinuke", label: "Anti-Nuke", icon: "🛡️", href: "/antinuke" },
     { id: "joingate", label: "Join Gate", icon: "🚪", href: "/joingate" },
