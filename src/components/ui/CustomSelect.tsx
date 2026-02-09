@@ -72,7 +72,8 @@ export default function CustomSelect({ name, options, defaultValue, placeholder 
 
             {/* Dropdown Options */}
             {isOpen && (
-                <div className="absolute z-50 w-full mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute left-0 right-0 z-[100] w-full mt-1 bg-[#0d0d0d]/95 border border-rose-500/30 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl"
+                    style={{ top: '100%' }}>
                     <div className="py-1">
                         {options.map((opt) => (
                             <div
