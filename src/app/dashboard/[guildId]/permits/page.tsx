@@ -66,12 +66,22 @@ export default async function PermitsPage({ params }: { params: { guildId: strin
     });
 
     // Fetch roles
-    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN!);
     let roles: APIRole[] = [];
+    let discordError = null;
+
     try {
+        const token = process.env.DISCORD_TOKEN;
+        if (!token) throw new Error("DISCORD_TOKEN missing");
+
+        const rest = new REST({ version: '10' }).setToken(token);
         roles = await rest.get(Routes.guildRoles(guildId)) as APIRole[];
-    } catch (e) {
+    } catch (e: any) {
         console.error("Failed to fetch roles", e);
+        discordError = e.message;
+    }
+
+    if (discordError) {
+        return <div className="p-4 text-red-400 bg-red-900/20 rounded-xl border border-red-500/20">Error loading roles: {discordError}</div>;
     }
 
     const permitsWithRoles = permits.map(p => {
@@ -166,10 +176,10 @@ export default async function PermitsPage({ params }: { params: { guildId: strin
                                     </h4>
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className={`text-xs px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${permit.level === 'L5' ? 'bg-red-500/20 text-red-400' :
-                                                permit.level === 'L4' ? 'bg-orange-500/20 text-orange-400' :
-                                                    permit.level === 'L3' ? 'bg-amber-500/20 text-amber-400' :
-                                                        permit.level === 'L2' ? 'bg-blue-500/20 text-blue-400' :
-                                                            'bg-emerald-500/20 text-emerald-400'
+                                            permit.level === 'L4' ? 'bg-orange-500/20 text-orange-400' :
+                                                permit.level === 'L3' ? 'bg-amber-500/20 text-amber-400' :
+                                                    permit.level === 'L2' ? 'bg-blue-500/20 text-blue-400' :
+                                                        'bg-emerald-500/20 text-emerald-400'
                                             }`}>
                                             {permit.level}
                                         </span>

@@ -76,15 +76,43 @@ export default async function VerificationPage({ params }: { params: { guildId: 
     });
 
     // Fetch Channels and Roles from Discord
-    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN!);
+    // Fetch Channels and Roles from Discord
     let channels: APIChannel[] = [];
     let roles: APIRole[] = [];
+    let discordError = null;
 
     try {
-        channels = await rest.get(Routes.guildChannels(guildId)) as APIChannel[];
-        roles = await rest.get(Routes.guildRoles(guildId)) as APIRole[];
-    } catch (e) {
-        console.error("Failed to fetch guild data from Discord", e);
+        const token = process.env.DISCORD_TOKEN;
+        if (!token) throw new Error("DISCORD_TOKEN is not set in environment variables");
+
+        const rest = new REST({ version: '10' }).setToken(token);
+
+        // Parallel fetch for speed
+        const [channelsData, rolesData] = await Promise.all([
+            rest.get(Routes.guildChannels(guildId)) as Promise<APIChannel[]>,
+            rest.get(Routes.guildRoles(guildId)) as Promise<APIRole[]>
+        ]);
+
+        channels = channelsData;
+        roles = rolesData;
+    } catch (e: any) {
+        console.error("Failed to fetch guild data from Discord:", e);
+        discordError = e.message || "Unknown error";
+    }
+
+    if (discordError) {
+        return (
+            <div className="p-8 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-200">
+                <h3 className="text-xl font-bold mb-2">Failed to load Discord Data</h3>
+                <p className="mb-4">Could not fetch channels and roles from Discord.</p>
+                <div className="bg-black/40 p-4 rounded-xl font-mono text-sm overflow-x-auto">
+                    {discordError}
+                </div>
+                <p className="mt-4 text-sm text-red-300/60">
+                    Check if the Bot is in the server and `DISCORD_TOKEN` is correct.
+                </p>
+            </div>
+        );
     }
 
     // Filter text channels

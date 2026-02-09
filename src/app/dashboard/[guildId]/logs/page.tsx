@@ -62,12 +62,22 @@ export default async function LogsPage({ params }: { params: { guildId: string }
     });
 
     // Fetch channels
-    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN!);
     let channels: APIChannel[] = [];
+    let discordError = null;
+
     try {
+        const token = process.env.DISCORD_TOKEN;
+        if (!token) throw new Error("DISCORD_TOKEN missing");
+
+        const rest = new REST({ version: '10' }).setToken(token);
         channels = await rest.get(Routes.guildChannels(guildId)) as APIChannel[];
-    } catch (e) {
+    } catch (e: any) {
         console.error("Failed to fetch channels", e);
+        discordError = e.message;
+    }
+
+    if (discordError) {
+        return <div className="p-4 text-red-400 bg-red-900/20 rounded-xl border border-red-500/20">Error loading channels: {discordError}</div>;
     }
 
     const textChannels = channels

@@ -47,12 +47,22 @@ export default async function SettingsPage({ params }: { params: { guildId: stri
     if (!guild) return <div>Guild not found</div>;
 
     // Fetch roles
-    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN!);
     let roles: APIRole[] = [];
+    let discordError = null;
+
     try {
+        const token = process.env.DISCORD_TOKEN;
+        if (!token) throw new Error("DISCORD_TOKEN missing");
+
+        const rest = new REST({ version: '10' }).setToken(token);
         roles = await rest.get(Routes.guildRoles(guildId)) as APIRole[];
-    } catch (e) {
+    } catch (e: any) {
         console.error("Failed to fetch roles", e);
+        discordError = e.message;
+    }
+
+    if (discordError) {
+        return <div className="p-4 text-red-400 bg-red-900/20 rounded-xl border border-red-500/20">Error: {discordError}</div>;
     }
 
     const roleOptions = roles.map(r => ({
